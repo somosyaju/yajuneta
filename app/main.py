@@ -84,6 +84,7 @@ Tarea:
 Compará precios entre el PDF y el Excel.
 Respondé SOLO si hay errores de precio y descripciones de producto
 Si hay errores, describilos.
+Decí la fila del excel del prodcuto con error 
 Si no hay errores, decilo explícitamente.
 Respondé en UN SOLO PÁRRAFO, en español.
 No hagas listas.
@@ -115,3 +116,4 @@ No hagas listas.
             os.remove(excel_path)
         except:
             pass
+
