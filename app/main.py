@@ -5,20 +5,16 @@ import tempfile
 import os
 import pdfplumber
 from openai import OpenAI
-from fastapi.templating import Jinja2Templates
-from fastapi import Request
 
 client = OpenAI()
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="templates")
-
-
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def index():
+    with open("templates/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 
 @app.post("/check")
