@@ -64,7 +64,7 @@ Ejemplo 1:
 PDF: TENA Toallas $7.149,50
 Excel: TENA Toallas 7148.40
 Respuesta correcta:
-"Hay un error de precio en el producto TENA Toallas, donde el valor del PDF no coincide con el del Excel."
+"Hay un error de precio en el producto TENA Toallas, donde el valor del PDF no coincide con el del Excel.(codigo de producto)"
 
 Ejemplo 2:
 PDF: ARROZ $1.299
@@ -116,4 +116,5 @@ No hagas listas.
             os.remove(excel_path)
         except:
             pass
+
 
