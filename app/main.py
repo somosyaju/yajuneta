@@ -72,6 +72,12 @@ Excel: ARROZ 1299
 Respuesta correcta:
 "No se detectan errores de precio."
 
+Ejemplo 3:
+PDF: EXTREME Lápiz labial chubby balm hmectante Tonos seleccionadoss 
+Excel: EXTREME Lápiz labial chubby balm humectante  Tonos seleccionados  
+Respuesta correcta:
+"Hay un error en la planra humectante y palabra seleccionadoss."
+
 DATOS REALES A ANALIZAR:
 
 PDF (ofertas):
@@ -116,5 +122,6 @@ No hagas listas.
             os.remove(excel_path)
         except:
             pass
+
 
 
