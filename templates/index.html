@@ -1,233 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<title>Yajuneta</title> 
-
-<style>
-* { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
-
-body {
-  margin: 0;
-  background: #0b0b0b;
-  color: white;
-  min-height: 100vh;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 30px 40px;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 36px;
-}
-
-header .dev {
-  text-align: right;
-  font-size: 14px;
-}
-
-.main {
-  padding: 60px 80px;
-}
-
-.uploads {
-  display: flex;
-  gap: 40px;
-  align-items: center;
-}
-
-.upload-box {
-  width: 340px;
-  height: 130px;
-  border: 1px solid #666;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  position: relative;
-}
-
-.upload-box.dashed {
-  border: 1px dashed #666;
-}
-
-.upload-box input {
-  display: none;
-}
-
-.upload-box span {
-  font-size: 18px;
-}
-
-.success {
-  margin-top: 10px;
-  background: #0f4d2f;
-  padding: 6px 12px;
-  font-size: 13px;
-}
-
-.actions {
-  margin-top: 40px;
-  display: flex;
-  align-items: center;
-  gap: 30px;
-}
-
-#status {
-  font-size: 16px;
-}
-
-button {
-  padding: 12px 28px;
-  font-size: 16px;
-  border: 2px solid #fff;
-  background: #fff;
-  color: #000;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #0a2cff;
-  color: #fff;
-  border-color: #0a2cff;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-#result {
-  margin-top: 40px;
-  white-space: pre-wrap;
-  font-family: Consolas, monospace;
-  font-size: 15px;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Verificador de precios con IA</title>
 </head>
-
 <body>
+    <h2>Verificar errores de precio</h2>
 
-<header>
-  <h1>Yajuneta</h1>
-  <div class="dev">
-    Desarrollado por Yaju<br>
-    julian@somosyaju.com
-  </div>
-</header>
+    <form id="form">
+        <label>PDF de ofertas</label><br>
+        <input type="file" name="pdf" accept=".pdf" required><br><br>
 
-<div class="main">
+        <label>Excel de precios</label><br>
+        <input type="file" name="excel" accept=".xlsx" required><br><br>
 
-  <div class="uploads">
+        <button type="submit">Verificar</button>
+    </form>
 
-    <!-- PDF -->
-    <label class="upload-box" id="pdfBox">
-      <input type="file" id="pdfFile" accept="application/pdf">
-      <span id="pdfText">+ Subir PDF</span>
-    </label>
+    <pre id="resultado"></pre>
 
-    <!-- EXCEL -->
-    <label class="upload-box dashed" id="excelBox">
-      <input type="file" id="excelFile" accept=".xls,.xlsx">
-      <span id="excelText">+ Subir EXCEL</span>
-    </label>
+    <script>
+        const form = document.getElementById("form");
+        const resultado = document.getElementById("resultado");
 
-  </div>
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-  <div class="actions">
-    <div id="status"></div>
-    <button id="verifyBtn">Verificar</button>
-  </div>
+            resultado.textContent = "Analizando con IA...";
 
-  <div id="result"></div>
+            const formData = new FormData(form);
 
-</div>
+            try {
+                const response = await fetch("/check", {
+                    method: "POST",
+                    body: formData
+                });
 
-<script>
-/* ====== ELEMENTOS ====== */
-const pdfInput   = document.getElementById("pdfFile");
-const excelInput = document.getElementById("excelFile");
-const pdfBox     = document.getElementById("pdfBox");
-const excelBox   = document.getElementById("excelBox");
-const pdfText    = document.getElementById("pdfText");
-const excelText  = document.getElementById("excelText");
-const status     = document.getElementById("status");
-const result     = document.getElementById("result");
-const button     = document.getElementById("verifyBtn");
+                const data = await response.json();
 
-/* ====== CLICK PARA SUBIR ARCHIVOS ====== */
-pdfBox.addEventListener("click", () => pdfInput.click());
-excelBox.addEventListener("click", () => excelInput.click());
+                resultado.textContent = data.ok
+                    ? data.message
+                    : "Error: " + data.error;
 
-/* ====== VISUAL AL SUBIR ARCHIVOS ====== */
-pdfInput.addEventListener("change", () => {
-  if (pdfInput.files.length) {
-    pdfText.innerHTML = `
-      ${pdfInput.files[0].name}
-      <div class="success">✔ Archivo subido correctamente</div>
-    `;
-  }
-});
-
-excelInput.addEventListener("change", () => {
-  if (excelInput.files.length) {
-    excelText.innerHTML = `
-      ${excelInput.files[0].name}
-      <div class="success">✔ Archivo subido correctamente</div>
-    `;
-  }
-});
-
-/* ====== VERIFICAR ====== */
-button.addEventListener("click", async () => {
-
-  if (!pdfInput.files.length || !excelInput.files.length) {
-    alert("Debes subir PDF y Excel");
-    return;
-  }
-
-  button.disabled = true;
-  status.textContent = "Verificando con Yajuneta IA...";
-  result.textContent = "";
-
-  const formData = new FormData();
-  formData.append("pdf", pdfInput.files[0]);
-  formData.append("excel", excelInput.files[0]);
-
-  try {
-    const response = await fetch("/check", {
-      method: "POST",
-      body: formData
-    });
-
-    const data = await response.json();
-
-    /* === MISMO COMPORTAMIENTO QUE EL SCRIPT VIEJO === */
-    if (data.ok === true) {
-      result.textContent = data.message;
-    } else {
-      result.textContent = "Error: " + (data.error || "Error desconocido");
-    }
-
-  } catch (err) {
-    result.textContent = "Error de conexión con el servidor";
-  }
-
-  status.textContent = "";
-  button.disabled = false;
-});
-</script>
-
-
-
+            } catch {
+                resultado.textContent = "Error de conexión con el servidor";
+            }
+        });
+    </script>
 </body>
 </html>
-
-
-
-
