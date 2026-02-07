@@ -1,171 +1,211 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Yajuneta</title>
 
 <style>
-* {
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+* { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: white;
+  min-height: 100vh;
 }
 
-body { 
-    margin: 0;
-    height: 100vh;
-    background: radial-gradient(circle at center, #111 0%, #000 70%);
-    color: white;
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px 40px;
 }
 
-/* HEADER */
-.header {
-    display: flex;
-    justify-content: space-between;
-    padding: 30px 40px;
+header h1 {
+  margin: 0;
+  font-size: 36px;
 }
 
-.logo {
-    font-size: 32px;
-    font-weight: 700;
+header .dev {
+  text-align: right;
+  font-size: 14px;
 }
 
-.author {
-    text-align: right;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-/* MAIN */
 .main {
-    margin-top: 80px;
-    padding-left: 80px;
+  padding: 60px 80px;
 }
 
-/* UPLOAD ZONES */
 .uploads {
-    display: flex;
-    gap: 40px;
-    margin-bottom: 40px;
+  display: flex;
+  gap: 40px;
+  align-items: center;
 }
 
 .upload-box {
-    width: 340px;
-    height: 110px;
-    border: 1px solid #777;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    font-size: 18px;
+  width: 340px;
+  height: 130px;
+  border: 1px solid #666;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
 }
 
 .upload-box.dashed {
-    border: 1px dashed #777;
-}
-
-.upload-box:hover {
-    border-color: white;
+  border: 1px dashed #666;
 }
 
 .upload-box input {
-    display: none;
+  display: none;
 }
 
-/* BUTTON */
+.upload-box span {
+  font-size: 18px;
+}
+
+.success {
+  margin-top: 10px;
+  background: #0f4d2f;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.actions {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+#status {
+  font-size: 16px;
+}
+
 button {
-    background: white;
-    color: black;
-    border: none;
-    padding: 14px 38px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.25s ease;
+  padding: 12px 28px;
+  font-size: 16px;
+  border: 2px solid #fff;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
 }
 
 button:hover {
-    background: #ddd;
+  background: #0a2cff;
+  color: #fff;
+  border-color: #0a2cff;
 }
 
-/* RESULT */
-.result {
-    margin-top: 50px;
-    max-width: 900px;
-    font-size: 16px;
-    line-height: 1.5;
-    white-space: pre-wrap;
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#result {
+  margin-top: 40px;
+  white-space: pre-wrap;
+  font-family: Consolas, monospace;
+  font-size: 15px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <div class="logo">Yajuneta</div>
-    <div class="author">
-        Desarrollado por Yaju<br>
-        julian@somosyaju.com
-    </div>
-</div>
+<header>
+  <h1>Yajuneta</h1>
+  <div class="dev">
+    Desarrollado por Yaju<br>
+    julian@somosyaju.com
+  </div>
+</header>
 
-<!-- MAIN -->
 <div class="main">
 
-    <form id="form">
+  <div class="uploads">
 
-        <div class="uploads">
+    <!-- PDF -->
+    <label class="upload-box" id="pdfBox">
+      <input type="file" id="pdfFile" accept="application/pdf">
+      <span id="pdfText">+ Subir PDF</span>
+    </label>
 
-            <!-- PDF -->
-            <label class="upload-box">
-                + Subir PDF
-                <input type="file" name="pdf" accept=".pdf" required>
-            </label>
+    <!-- EXCEL -->
+    <label class="upload-box dashed" id="excelBox">
+      <input type="file" id="excelFile" accept=".xls,.xlsx">
+      <span id="excelText">+ Subir EXCEL</span>
+    </label>
 
-            <!-- EXCEL -->
-            <label class="upload-box dashed">
-                + Subir EXCEL
-                <input type="file" name="excel" accept=".xlsx" required>
-            </label>
+  </div>
 
-        </div>
+  <div class="actions">
+    <div id="status"></div>
+    <button id="verifyBtn">Verificar</button>
+  </div>
 
-        <button type="submit">Verificar</button>
-
-    </form>
-
-    <div class="result" id="result"></div>
+  <div id="result"></div>
 
 </div>
 
 <script>
-const form = document.getElementById("form");
+const pdfInput = document.getElementById("pdfFile");
+const excelInput = document.getElementById("excelFile");
+const pdfText = document.getElementById("pdfText");
+const excelText = document.getElementById("excelText");
+const status = document.getElementById("status");
 const result = document.getElementById("result");
+const button = document.getElementById("verifyBtn");
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    result.textContent = "Analizando con IA...";
+pdfInput.addEventListener("change", () => {
+  if (pdfInput.files.length) {
+    pdfText.innerHTML = `
+      ${pdfInput.files[0].name}
+      <div class="success">✔ Archivo subido correctamente</div>
+    `;
+  }
+});
 
-    const formData = new FormData(form);
+excelInput.addEventListener("change", () => {
+  if (excelInput.files.length) {
+    excelText.innerHTML = `
+      ${excelInput.files[0].name}
+      <div class="success">✔ Archivo subido correctamente</div>
+    `;
+  }
+});
 
-    try {
-        const res = await fetch("/check", {
-            method: "POST",
-            body: formData
-        });
+button.addEventListener("click", async () => {
+  if (!pdfInput.files.length || !excelInput.files.length) {
+    alert("Subí PDF y Excel");
+    return;
+  }
 
-        const data = await res.json();
+  button.disabled = true;
+  status.textContent = "Verificando con Yajuneta IA...";
+  result.textContent = "";
 
-        result.textContent = data.ok
-            ? data.message
-            : "Error: " + data.error;
+  const formData = new FormData();
+  formData.append("pdf", pdfInput.files[0]);
+  formData.append("excel", excelInput.files[0]);
 
-    } catch {
-        result.textContent = "Error de conexión con el servidor";
-    }
+  try {
+    const res = await fetch("/check", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    result.textContent = data.resultado || "Sin errores detectados.";
+
+  } catch (err) {
+    result.textContent = "Error al verificar.";
+  }
+
+  status.textContent = "";
+  button.disabled = false;
 });
 </script>
 
 </body>
 </html>
-
