@@ -2,155 +2,110 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Yajuneta</title>
+<title>Verificador de precios con IA</title>
 
 <style>
-* {
-  box-sizing: border-box;
+body {
+  background: #0b0b0b;
+  color: white;
   font-family: Arial, Helvetica, sans-serif;
 }
 
-body {
-  margin: 0;
-  background: #0b0b0b;
-  color: white;
-  min-height: 100vh;
+h2 {
+  margin-bottom: 40px;
 }
 
-/* ===== HEADER ===== */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 30px 40px;
+.form-group {
+  margin-bottom: 30px;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 36px;
-}
-
-header .dev {
-  font-size: 14px;
-  text-align: right;
-}
-
-/* ===== MAIN ===== */
-.main {
-  padding: 80px 80px;
-}
-
-/* ===== FORM ===== */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-/* ===== UPLOAD ZONES ===== */
-.uploads {
-  display: flex;
-  gap: 40px;
-}
-
-.upload-box {
-  width: 360px;
-  height: 140px;
-  border: 1px solid #666;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.upload-box.dashed {
+.file-box {
   border: 1px dashed #666;
+  padding: 20px;
+  width: 380px;
 }
 
-.upload-box span {
-  font-size: 18px;
+.file-name {
+  margin-top: 10px;
+  font-size: 15px;
 }
 
-.upload-box input {
-  display: none;
-}
-
-/* ===== BUTTON ===== */
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 30px;
+.file-ok {
+  margin-top: 6px;
+  color: #2ecc71;
+  font-size: 14px;
 }
 
 button {
-  padding: 12px 30px;
-  font-size: 16px;
-  border: 2px solid white;
-  background: white;
-  color: black;
+  padding: 10px 28px;
+  font-size: 15px;
   cursor: pointer;
 }
 
-button:hover {
-  background: #0a2cff;
-  border-color: #0a2cff;
-  color: white;
-}
-
-/* ===== RESULT ===== */
-#resultado {
-  margin-top: 30px;
+pre {
+  margin-top: 40px;
   white-space: pre-wrap;
-  font-family: Consolas, monospace;
-  font-size: 15px;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Yajuneta</h1>
-  <div class="dev">
-    Desarrollado por Yaju<br>
-    julian@somosyaju.com
-  </div>
-</header>
-
-<div class="main">
+<h2>Verificar errores de precio</h2>
 
 <form id="form">
 
-  <div class="uploads">
-
-    <!-- PDF -->
-    <label class="upload-box">
+  <div class="form-group">
+    <label>PDF de ofertas</label><br><br>
+    <div class="file-box">
       <input type="file" name="pdf" accept=".pdf" required>
-      <span>+ Subir PDF</span>
-    </label>
+      <div class="file-name" id="pdf-name"></div>
+      <div class="file-ok" id="pdf-ok"></div>
+    </div>
+  </div>
 
-    <!-- EXCEL -->
-    <label class="upload-box dashed">
+  <div class="form-group">
+    <label>Excel de precios</label><br><br>
+    <div class="file-box">
       <input type="file" name="excel" accept=".xlsx" required>
-      <span>+ Subir EXCEL</span>
-    </label>
-
+      <div class="file-name" id="excel-name"></div>
+      <div class="file-ok" id="excel-ok"></div>
+    </div>
   </div>
 
-  <div class="actions">
-    <button type="submit">Verificar</button>
-  </div>
+  <button type="submit">Verificar</button>
 
 </form>
 
 <pre id="resultado"></pre>
 
-</div>
-
 <script>
 const form = document.getElementById("form");
 const resultado = document.getElementById("resultado");
 
+/* === SOLO FEEDBACK VISUAL === */
+const pdfInput = form.querySelector('input[name="pdf"]');
+const excelInput = form.querySelector('input[name="excel"]');
+
+pdfInput.addEventListener("change", () => {
+  if (pdfInput.files.length) {
+    document.getElementById("pdf-name").textContent =
+      pdfInput.files[0].name;
+    document.getElementById("pdf-ok").textContent =
+      "✔ Archivo subido correctamente";
+  }
+});
+
+excelInput.addEventListener("change", () => {
+  if (excelInput.files.length) {
+    document.getElementById("excel-name").textContent =
+      excelInput.files[0].name;
+    document.getElementById("excel-ok").textContent =
+      "✔ Archivo subido correctamente";
+  }
+});
+
+/* === SUBMIT ORIGINAL (NO TOCADO) === */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
