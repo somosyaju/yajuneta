@@ -1,51 +1,138 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Verificador de precios con IA</title>
-</head>
-<body>
-    <h2>Verificar errores de precio</h2>
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import HTMLResponse, JSONResponse
+import pandas as pd
+import tempfile
+import os
+import pdfplumber
+from openai import OpenAI
 
-    <form id="form">
-        <label>PDF de ofertas</label><br>
-        <input type="file" name="pdf" accept=".pdf" required><br><br>
+client = OpenAI()
 
-        <label>Excel de precios</label><br>
-        <input type="file" name="excel" accept=".xlsx" required><br><br>
+app = FastAPI()
 
-        <button type="submit">Verificar</button>
-    </form>
 
-    <pre id="resultado"></pre>
+@app.get("/", response_class=HTMLResponse)
+def index():
+    with open("templates/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
-    <script>
-        const form = document.getElementById("form");
-        const resultado = document.getElementById("resultado");
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+@app.post("/check")
+async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
+    try:
+        # ---------- Guardar archivos ----------
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as pdf_tmp:
+            pdf_tmp.write(await pdf.read())
+            pdf_path = pdf_tmp.name
 
-            resultado.textContent = "Analizando con IA...";
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as xls_tmp:
+            xls_tmp.write(await excel.read())
+            excel_path = xls_tmp.name
 
-            const formData = new FormData(form);
+        # ---------- Extraer texto del PDF ----------
+        pdf_text = ""
+        with pdfplumber.open(pdf_path) as pdf_file:
+            for page in pdf_file.pages:
+                pdf_text += page.extract_text() + "\n"
 
-            try {
-                const response = await fetch("/check", {
-                    method: "POST",
-                    body: formData
-                });
+        # ---------- Leer Excel ----------
+        df = pd.read_excel(excel_path)
+        excel_text = df.to_string(index=False)
 
-                const data = await response.json();
+        # ---------- Prompt a la IA ----------
+        prompt = f"""
+Actuá como un auditor de precios y descripciones profesional.
 
-                resultado.textContent = data.ok
-                    ? data.message
-                    : "Error: " + data.error;
+REGLAS OBLIGATORIAS:
+- No inventes precios.
+- No asumas coincidencias.
+- Compará SOLO precios numéricos.
+- Ignorá diferencias de formato (puntos, comas, símbolo $).
+- Reportá errores SOLO si el valor numérico NO coincide.
+- Si no hay errores, respondé exactamente:
+  "No se detectan errores de precio."
 
-            } catch {
-                resultado.textContent = "Error de conexión con el servidor";
-            }
-        });
-    </script>
-</body>
-</html>
+FORMATO DE RESPUESTA:
+- Un solo párrafo.
+- En español.
+- Sin listas.
+- Sin explicaciones técnicas.
+
+EJEMPLOS:
+
+Ejemplo 1:
+PDF: TENA Toallas $7.149,50
+Excel: TENA Toallas 7148.40
+Respuesta correcta:
+"Hay un error de precio en el producto TENA Toallas, donde el valor del PDF no coincide con el del Excel.(codigo de producto)"
+
+Ejemplo 2:
+PDF: ARROZ $1.299
+Excel: ARROZ 1299
+Respuesta correcta:
+"No se detectan errores de precio."
+
+Ejemplo 3:
+PDF: EXTREME Lápiz labial chubby balm hmectante Tonos seleccionadoss 
+Excel: EXTREME Lápiz labial chubby balm humectante  Tonos seleccionados  
+Respuesta correcta:
+"Hay un error en la planra humectante y palabra seleccionadoss."
+
+REGLAS ADICIONALES SOBRE DESCRIPCIONES:
+- Compará las descripciones del producto del PDF contra el Excel.
+- Considerá ERROR si la descripción NO es exactamente igual al Excel.
+- No corrijas, no interpretes, no normalices.
+- Las descripciones deben coincidir carácter por carácter.
+- Diferencias de mayúsculas, espacios, símbolos o abreviaturas
+  cuentan como ERROR.
+
+DATOS REALES A ANALIZAR:
+
+PDF (ofertas):
+{pdf_text}
+
+Excel (datos correctos):
+{excel_text}
+
+Tarea:
+Compará precios y descpicpiones entre el PDF y el Excel.
+Respondé SOLO si hay errores de precio y descripciones de producto
+Si hay errores, describilos.
+Decí la fila del excel del prodcuto con error 
+Si no hay errores, decilo explícitamente.
+Respondé en UN SOLO PÁRRAFO, en español.
+No hagas listas.
+Reportá errores SOLO si:
+- hay diferencia de precio, y/o
+- la descripción del producto NO coincide exactamente con el Excel.
+"""
+
+        # ---------- Llamada a la IA ----------
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Sos un auditor de precios muy preciso."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0
+        )
+
+        result_text = response.choices[0].message.content.strip()
+
+        return {"ok": True, "message": result_text}
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": str(e)}
+        )
+
+    finally:
+        try:
+            os.remove(pdf_path)
+            os.remove(excel_path)
+        except:
+            pass
+
+
+
