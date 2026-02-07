@@ -41,14 +41,16 @@ async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
 
         # ---------- Prompt a la IA ----------
         prompt = f"""
-Actuá como un auditor de precios profesional.
+Actuá como un auditor de precios y descripciones profesional.
 
 REGLAS OBLIGATORIAS:
 - No inventes precios.
 - No asumas coincidencias.
-- Compará SOLO precios numéricos.
+- Compará  precios numéricos.
+- Compara descipciones
 - Ignorá diferencias de formato (puntos, comas, símbolo $).
-- Reportá errores SOLO si el valor numérico NO coincide.
+- Reportá errores si el valor numérico NO coincide.
+- Reportá errores si la descripcion NO coincide.
 - Si no hay errores, respondé exactamente:
   "No se detectan errores de precio."
 
@@ -87,7 +89,7 @@ Excel (datos correctos):
 {excel_text}
 
 Tarea:
-Compará precios entre el PDF y el Excel.
+Compará precios y descpicpiones entre el PDF y el Excel.
 Respondé SOLO si hay errores de precio y descripciones de producto
 Si hay errores, describilos.
 Decí la fila del excel del prodcuto con error 
@@ -122,6 +124,7 @@ No hagas listas.
             os.remove(excel_path)
         except:
             pass
+
 
 
 
