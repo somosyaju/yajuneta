@@ -149,6 +149,7 @@ button:disabled {
 </div>
 
 <script>
+<script>
 const pdfInput = document.getElementById("pdfFile");
 const excelInput = document.getElementById("excelFile");
 const pdfText = document.getElementById("pdfText");
@@ -197,11 +198,16 @@ button.addEventListener("click", async () => {
 
     const text = await res.text();
 
-try {
-  const data = JSON.parse(text);
-  result.textContent =
-    data.resultado ||
-    data.error ||
+    try {
+      const data = JSON.parse(text);
+      result.textContent =
+        data.resultado ||
+        data.error ||
+        data.message ||
+        text;
+    } catch {
+      result.textContent = text;
+    }
 
   } catch (err) {
     result.textContent = "Error al verificar.";
@@ -212,7 +218,9 @@ try {
 });
 </script>
 
+
 </body>
 </html>
+
 
 
