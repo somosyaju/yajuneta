@@ -195,8 +195,13 @@ button.addEventListener("click", async () => {
       body: formData
     });
 
-    const data = await res.json();
-    result.textContent = data.resultado || "Sin errores detectados.";
+    const text = await res.text();
+
+try {
+  const data = JSON.parse(text);
+  result.textContent =
+    data.resultado ||
+    data.error ||
 
   } catch (err) {
     result.textContent = "Error al verificar.";
@@ -209,4 +214,5 @@ button.addEventListener("click", async () => {
 
 </body>
 </html>
+
 
