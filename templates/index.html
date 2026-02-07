@@ -1,65 +1,165 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    
-    <meta charset="UTF-8">
-    <title>Verificador de precios con Yajuneta e IA</title>
-    <style>
-    pre {
-  max-width: 100%;       /* O un valor fijo como 500px */
-  white-space: pre-wrap; /* Mantiene espacios pero permite saltos de línea */
-  word-wrap: break-word; /* Rompe palabras largas si es necesario */
+<meta charset="UTF-8">
+<title>Yajuneta IA</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f6f6f6;
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
 }
-        </style>
+
+.container {
+    background: white;
+    width: 420px;
+    padding: 30px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,.1);
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.upload-box {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.upload-box input {
+    display: none;
+}
+
+.filename {
+    font-size: 14px;
+    color: #333;
+    margin-top: 5px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #ccc;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: not-allowed;
+    transition: background .3s;
+}
+
+button.enabled {
+    background: #000;
+    cursor: pointer;
+}
+
+button.enabled:hover {
+    background: #444;
+}
+
+.result {
+    margin-top: 20px;
+    font-size: 14px;
+    white-space: pre-wrap;
+}
+
+.footer {
+    margin-top: 25px;
+    font-size: 12px;
+    color: #777;
+}
+</style>
 </head>
-    
+
 <body>
-    <h2>Verificador Yajuneta</h2>
+
+<div class="container">
+
+    <!-- ESTADO 1 / 2 / 3 -->
+    <div class="logo">Yajuneta</div>
 
     <form id="form">
-        <label>PDF de ofertas</label><br>
-        <input type="file" name="pdf" accept=".pdf" required><br><br>
 
-        <label>Excel de precios</label><br>
-        <input type="file" name="excel" accept=".xlsx" required><br><br>
+        <!-- EXCEL -->
+        <label class="upload-box">
+            Subir EXCEL
+            <input type="file" name="excel" id="excel" accept=".xlsx">
+            <div class="filename" id="excelName"></div>
+        </label>
 
-        <button type="submit">Verificar</button>
+        <!-- PDF -->
+        <label class="upload-box">
+            + Subir PDF +
+            <input type="file" name="pdf" id="pdf" accept=".pdf">
+            <div class="filename" id="pdfName"></div>
+        </label>
+
+        <!-- BOTÓN -->
+        <button id="btn" disabled>Verificar</button>
+
     </form>
 
-    <pre id="resultado"></pre>
+    <!-- RESULTADO IA -->
+    <div class="result" id="result"></div>
 
-    <script>
-        const form = document.getElementById("form");
-        const resultado = document.getElementById("resultado");
+    <div class="footer">
+        Desarrollado por Yaju<br>
+        julian@somosyaju.com
+    </div>
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+</div>
 
-            resultado.textContent = "Analizando con Yajuneta IA...";
+<script>
+const excel = document.getElementById("excel");
+const pdf = document.getElementById("pdf");
+const btn = document.getElementById("btn");
+const result = document.getElementById("result");
 
-            const formData = new FormData(form);
+excel.onchange = () => {
+    document.getElementById("excelName").textContent = excel.files[0]?.name || "";
+    checkReady();
+};
 
-            try {
-                const response = await fetch("/check", {
-                    method: "POST",
-                    body: formData
-                });
+pdf.onchange = () => {
+    document.getElementById("pdfName").textContent = pdf.files[0]?.name || "";
+    checkReady();
+};
 
-                const data = await response.json();
+function checkReady() {
+    if (excel.files.length && pdf.files.length) {
+        btn.disabled = false;
+        btn.classList.add("enabled");
+    }
+}
 
-                resultado.textContent = data.ok
-                    ? data.message
-                    : "Error: " + data.error;
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
 
-            } catch {
-                resultado.textContent = "Error de conexión con el servidor";
-            }
-        });
-    </script>
+    result.textContent = "Verificando con Yajuneta IA...";
+
+    const formData = new FormData(e.target);
+
+    const response = await fetch("/check", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    result.textContent = data.ok
+        ? data.message
+        : "Error: " + data.error;
+};
+</script>
+
 </body>
 </html>
-
-
-
-
-
