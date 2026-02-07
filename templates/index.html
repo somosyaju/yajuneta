@@ -2,163 +2,168 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Yajuneta IA</title>
+<title>Yajuneta</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f6f6f6;
-    display: flex;
-    justify-content: center;
-    margin-top: 40px;
+* {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-.container {
-    background: white;
-    width: 420px;
-    padding: 30px;
-    text-align: center;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0,0,0,.1);
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at center, #111 0%, #000 70%);
+    color: white;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 30px 40px;
 }
 
 .logo {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 20px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.author {
+    text-align: right;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* MAIN */
+.main {
+    margin-top: 80px;
+    padding-left: 80px;
+}
+
+/* UPLOAD ZONES */
+.uploads {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
 }
 
 .upload-box {
-    border: 2px dashed #ccc;
-    padding: 20px;
-    margin-bottom: 15px;
+    width: 340px;
+    height: 110px;
+    border: 1px solid #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 18px;
+}
+
+.upload-box.dashed {
+    border: 1px dashed #777;
+}
+
+.upload-box:hover {
+    border-color: white;
 }
 
 .upload-box input {
     display: none;
 }
 
-.filename {
-    font-size: 14px;
-    color: #333;
-    margin-top: 5px;
-}
-
+/* BUTTON */
 button {
-    width: 100%;
-    padding: 12px;
+    background: white;
+    color: black;
     border: none;
-    background: #ccc;
-    color: white;
+    padding: 14px 38px;
     font-size: 16px;
-    border-radius: 6px;
-    cursor: not-allowed;
-    transition: background .3s;
-}
-
-button.enabled {
-    background: #000;
     cursor: pointer;
+    transition: all 0.25s ease;
 }
 
-button.enabled:hover {
-    background: #444;
+button:hover {
+    background: #ddd;
 }
 
+/* RESULT */
 .result {
-    margin-top: 20px;
-    font-size: 14px;
+    margin-top: 50px;
+    max-width: 900px;
+    font-size: 16px;
+    line-height: 1.5;
     white-space: pre-wrap;
-}
-
-.footer {
-    margin-top: 25px;
-    font-size: 12px;
-    color: #777;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-    <!-- ESTADO 1 / 2 / 3 -->
+<!-- HEADER -->
+<div class="header">
     <div class="logo">Yajuneta</div>
-
-    <form id="form">
-
-        <!-- EXCEL -->
-        <label class="upload-box">
-            Subir EXCEL
-            <input type="file" name="excel" id="excel" accept=".xlsx">
-            <div class="filename" id="excelName"></div>
-        </label>
-
-        <!-- PDF -->
-        <label class="upload-box">
-            + Subir PDF +
-            <input type="file" name="pdf" id="pdf" accept=".pdf">
-            <div class="filename" id="pdfName"></div>
-        </label>
-
-        <!-- BOTÓN -->
-        <button id="btn" disabled>Verificar</button>
-
-    </form>
-
-    <!-- RESULTADO IA -->
-    <div class="result" id="result"></div>
-
-    <div class="footer">
+    <div class="author">
         Desarrollado por Yaju<br>
         julian@somosyaju.com
     </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <form id="form">
+
+        <div class="uploads">
+
+            <!-- PDF -->
+            <label class="upload-box">
+                + Subir PDF
+                <input type="file" name="pdf" accept=".pdf" required>
+            </label>
+
+            <!-- EXCEL -->
+            <label class="upload-box dashed">
+                + Subir EXCEL
+                <input type="file" name="excel" accept=".xlsx" required>
+            </label>
+
+        </div>
+
+        <button type="submit">Verificar</button>
+
+    </form>
+
+    <div class="result" id="result"></div>
 
 </div>
 
 <script>
-const excel = document.getElementById("excel");
-const pdf = document.getElementById("pdf");
-const btn = document.getElementById("btn");
+const form = document.getElementById("form");
 const result = document.getElementById("result");
 
-excel.onchange = () => {
-    document.getElementById("excelName").textContent = excel.files[0]?.name || "";
-    checkReady();
-};
-
-pdf.onchange = () => {
-    document.getElementById("pdfName").textContent = pdf.files[0]?.name || "";
-    checkReady();
-};
-
-function checkReady() {
-    if (excel.files.length && pdf.files.length) {
-        btn.disabled = false;
-        btn.classList.add("enabled");
-    }
-}
-
-document.getElementById("form").onsubmit = async (e) => {
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    result.textContent = "Analizando con IA...";
 
-    result.textContent = "Verificando con Yajuneta IA...";
+    const formData = new FormData(form);
 
-    const formData = new FormData(e.target);
+    try {
+        const res = await fetch("/check", {
+            method: "POST",
+            body: formData
+        });
 
-    const response = await fetch("/check", {
-        method: "POST",
-        body: formData
-    });
+        const data = await res.json();
 
-    const data = await response.json();
+        result.textContent = data.ok
+            ? data.message
+            : "Error: " + data.error;
 
-    result.textContent = data.ok
-        ? data.message
-        : "Error: " + data.error;
-};
+    } catch {
+        result.textContent = "Error de conexión con el servidor";
+    }
+});
 </script>
 
 </body>
