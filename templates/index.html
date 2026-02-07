@@ -149,14 +149,22 @@ button:disabled {
 </div>
 
 <script>
-const pdfInput = document.getElementById("pdfFile");
+/* ====== ELEMENTOS ====== */
+const pdfInput   = document.getElementById("pdfFile");
 const excelInput = document.getElementById("excelFile");
-const pdfText = document.getElementById("pdfText");
-const excelText = document.getElementById("excelText");
-const status = document.getElementById("status");
-const result = document.getElementById("result");
-const button = document.getElementById("verifyBtn");
+const pdfBox     = document.getElementById("pdfBox");
+const excelBox   = document.getElementById("excelBox");
+const pdfText    = document.getElementById("pdfText");
+const excelText  = document.getElementById("excelText");
+const status     = document.getElementById("status");
+const result     = document.getElementById("result");
+const button     = document.getElementById("verifyBtn");
 
+/* ====== CLICK PARA SUBIR ARCHIVOS ====== */
+pdfBox.addEventListener("click", () => pdfInput.click());
+excelBox.addEventListener("click", () => excelInput.click());
+
+/* ====== VISUAL AL SUBIR ARCHIVOS ====== */
 pdfInput.addEventListener("change", () => {
   if (pdfInput.files.length) {
     pdfText.innerHTML = `
@@ -175,9 +183,11 @@ excelInput.addEventListener("change", () => {
   }
 });
 
+/* ====== VERIFICAR ====== */
 button.addEventListener("click", async () => {
+
   if (!pdfInput.files.length || !excelInput.files.length) {
-    alert("Subí PDF y Excel");
+    alert("Debes subir PDF y Excel");
     return;
   }
 
@@ -190,26 +200,22 @@ button.addEventListener("click", async () => {
   formData.append("excel", excelInput.files[0]);
 
   try {
-    const res = await fetch("/check", {
+    const response = await fetch("/check", {
       method: "POST",
       body: formData
     });
 
-    const text = await res.text();
+    const data = await response.json();
 
-    try {
-      const data = JSON.parse(text);
-      result.textContent =
-        data.resultado ||
-        data.error ||
-        data.message ||
-        text;
-    } catch {
-      result.textContent = text;
+    /* === MISMO COMPORTAMIENTO QUE EL SCRIPT VIEJO === */
+    if (data.ok === true) {
+      result.textContent = data.message;
+    } else {
+      result.textContent = "Error: " + (data.error || "Error desconocido");
     }
 
   } catch (err) {
-    result.textContent = "Error al verificar.";
+    result.textContent = "Error de conexión con el servidor";
   }
 
   status.textContent = "";
@@ -218,8 +224,10 @@ button.addEventListener("click", async () => {
 </script>
 
 
+
 </body>
 </html>
+
 
 
 
