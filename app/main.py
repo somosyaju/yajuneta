@@ -46,11 +46,9 @@ Actuá como un auditor de precios y descripciones profesional.
 REGLAS OBLIGATORIAS:
 - No inventes precios.
 - No asumas coincidencias.
-- Compará  precios numéricos.
-- Compara descipciones
+- Compará SOLO precios numéricos.
 - Ignorá diferencias de formato (puntos, comas, símbolo $).
-- Reportá errores si el valor numérico NO coincide.
-- Reportá errores si la descripcion NO coincide.
+- Reportá errores SOLO si el valor numérico NO coincide.
 - Si no hay errores, respondé exactamente:
   "No se detectan errores de precio."
 
@@ -80,6 +78,14 @@ Excel: EXTREME Lápiz labial chubby balm humectante  Tonos seleccionados
 Respuesta correcta:
 "Hay un error en la planra humectante y palabra seleccionadoss."
 
+REGLAS ADICIONALES SOBRE DESCRIPCIONES:
+- Compará las descripciones del producto del PDF contra el Excel.
+- Considerá ERROR si la descripción NO es exactamente igual al Excel.
+- No corrijas, no interpretes, no normalices.
+- Las descripciones deben coincidir carácter por carácter.
+- Diferencias de mayúsculas, espacios, símbolos o abreviaturas
+  cuentan como ERROR.
+
 DATOS REALES A ANALIZAR:
 
 PDF (ofertas):
@@ -96,6 +102,9 @@ Decí la fila del excel del prodcuto con error
 Si no hay errores, decilo explícitamente.
 Respondé en UN SOLO PÁRRAFO, en español.
 No hagas listas.
+Reportá errores SOLO si:
+- hay diferencia de precio, y/o
+- la descripción del producto NO coincide exactamente con el Excel.
 """
 
         # ---------- Llamada a la IA ----------
