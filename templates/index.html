@@ -1,51 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Verificador de precios con IA</title>
+<meta charset="UTF-8">
+<title>Yajuneta – Verificador</title>
+
+<style>
+body {
+  background:#0b0b0b;
+  color:white;
+  font-family:Arial, Helvetica, sans-serif;
+  padding:40px;
+}
+
+h2 { margin-bottom:30px; }
+
+.upload {
+  border:1px dashed #666;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+button {
+  padding:10px 25px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:hover {
+  background:#0a2cff;
+  color:white;
+}
+
+#resultado {
+  margin-top:30px;
+  white-space:pre-wrap;
+}
+</style>
 </head>
+
 <body>
-    <h2>Verificar errores de precio</h2>
 
-    <form id="form">
-        <label>PDF de ofertas</label><br>
-        <input type="file" name="pdf" accept=".pdf" required><br><br>
+<h2>Verificar errores de precio</h2>
 
-        <label>Excel de precios</label><br>
-        <input type="file" name="excel" accept=".xlsx" required><br><br>
+<form id="form">
+  <div class="upload">
+    <label>PDF de ofertas</label><br>
+    <input type="file" name="pdf" accept=".pdf" required>
+  </div>
 
-        <button type="submit">Verificar</button>
-    </form>
+  <div class="upload">
+    <label>Excel de precios</label><br>
+    <input type="file" name="excel" accept=".xlsx" required>
+  </div>
 
-    <pre id="resultado"></pre>
+  <button type="submit">Verificar</button>
+</form>
 
-    <script>
-        const form = document.getElementById("form");
-        const resultado = document.getElementById("resultado");
+<pre id="resultado"></pre>
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+<script>
+const form = document.getElementById("form");
+const resultado = document.getElementById("resultado");
 
-            resultado.textContent = "Analizando con IA...";
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-            const formData = new FormData(form);
+  resultado.textContent = "Analizando con IA...";
 
-            try {
-                const response = await fetch("/check", {
-                    method: "POST",
-                    body: formData
-                });
+  const formData = new FormData(form);
 
-                const data = await response.json();
+  try {
+    const response = await fetch("/check", {
+      method: "POST",
+      body: formData
+    });
 
-                resultado.textContent = data.ok
-                    ? data.message
-                    : "Error: " + data.error;
+    const data = await response.json();
 
-            } catch {
-                resultado.textContent = "Error de conexión con el servidor";
-            }
-        });
-    </script>
+    resultado.textContent = data.ok
+      ? data.message
+      : "Error: " + data.error;
+
+  } catch {
+    resultado.textContent = "Error de conexión con el servidor";
+  }
+});
+</script>
+
 </body>
 </html>
