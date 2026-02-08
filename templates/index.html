@@ -25,7 +25,7 @@ header {
 }
 
 header h1 {
-  margin: 0;
+  margin-left: 3%;
   font-size: 36px;
 }
 
@@ -44,6 +44,12 @@ form {
   display: flex;
   flex-direction: column;
   gap: 40px;
+}
+.success {
+  margin-top: 10px;
+  background: #0f4d2f;
+  padding: 6px 12px;
+  font-size: 13px;
 }
 
 /* ===== UPLOADS ===== */
@@ -90,7 +96,7 @@ form {
 .actions {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 0px;
 }
 
 #status {
@@ -135,8 +141,10 @@ button:disabled {
 <header>
   <h1>Yajuneta</h1>
   <div class="dev">
-    Desarrollado por Yaju<br>
-    julian@somosyaju.com
+    Desarrollador<br>
+    <img src="logoyaju2.png" width= 20%><br>
+    
+    <a style="color: white;" href="mailito:julian@somosyaju.com" >Contacto</a><br>
   </div>
 </header>
 
@@ -187,7 +195,7 @@ pdfInput.addEventListener("change", () => {
   if (pdfInput.files.length) {
     pdfText.innerHTML = `
       ${pdfInput.files[0].name}
-      <small>✔ Archivo subido correctamente</small>
+      <div class="success">✔ Archivo subido correctamente</div>
     `;
   }
 });
@@ -196,7 +204,7 @@ excelInput.addEventListener("change", () => {
   if (excelInput.files.length) {
     excelText.innerHTML = `
       ${excelInput.files[0].name}
-      <small>✔ Archivo subido correctamente</small>
+      <div class="success">✔ Archivo subido correctamente</div>
     `;
   }
 });
