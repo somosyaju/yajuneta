@@ -49,10 +49,10 @@ async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
         {prompt_base}
 
         PDF:
-        {texto_pdf}
+        {pdf_text}
 
         EXCEL:
-        {texto_excel}
+        {excel_text}
         """
 
         # ---------- Llamada a la IA ----------
@@ -81,5 +81,6 @@ async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
             os.remove(excel_path)
         except:
             pass
+
 
 
