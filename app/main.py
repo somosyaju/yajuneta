@@ -40,12 +40,12 @@ async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
         excel_text = df.to_string(index=False)
 
         # ---------- Prompt a la IA ----------
-       def cargar_prompt(ruta="prompt_auditoria.txt"):
-         with open(ruta, "r", encoding="utf-8") as f:
-             return f.read()
+        def cargar_prompt(ruta="prompt_auditoria.txt"):
+        with open(ruta, "r", encoding="utf-8") as f:
+            return f.read()
                  prompt_base = cargar_prompt()
 
-                prompt = f"""
+        prompt = f"""
 {prompt_base}
 
 PDF:
@@ -81,3 +81,4 @@ EXCEL:
             os.remove(excel_path)
         except:
             pass
+
