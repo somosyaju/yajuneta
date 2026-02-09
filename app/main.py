@@ -41,19 +41,19 @@ async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
 
         # ---------- Prompt a la IA ----------
         def cargar_prompt(ruta="prompt_auditoria.txt"):
-        with open(ruta, "r", encoding="utf-8") as f:
-            return f.read()
-                 prompt_base = cargar_prompt()
+            with open(ruta, "r", encoding="utf-8") as f:
+                return f.read()
+        prompt_base = cargar_prompt()
 
         prompt = f"""
-{prompt_base}
+        {prompt_base}
 
-PDF:
-{texto_pdf}
+        PDF:
+        {texto_pdf}
 
-EXCEL:
-{texto_excel}
-"""
+        EXCEL:
+        {texto_excel}
+        """
 
         # ---------- Llamada a la IA ----------
         response = client.chat.completions.create(
@@ -81,4 +81,5 @@ EXCEL:
             os.remove(excel_path)
         except:
             pass
+
 
