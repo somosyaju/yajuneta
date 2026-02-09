@@ -40,71 +40,19 @@ async def check(pdf: UploadFile = File(...), excel: UploadFile = File(...)):
         excel_text = df.to_string(index=False)
 
         # ---------- Prompt a la IA ----------
-        prompt = f"""
-Actuá como un auditor de precios y descripciones profesional.
+       def cargar_prompt(ruta="prompt_auditoria.txt"):
+    with open(ruta, "r", encoding="utf-8") as f:
+        return f.read()
+        prompt_base = cargar_prompt()
 
-REGLAS OBLIGATORIAS:
-- No inventes precios.
-- No asumas coincidencias.
-- Compará SOLO precios numéricos.
-- Ignorá diferencias de formato (puntos, comas, símbolo $).
-- Reportá errores SOLO si el valor numérico NO coincide.
-- Si no hay errores, respondé exactamente:
-  "No se detectan errores de precio."
+prompt = f"""
+{prompt_base}
 
-FORMATO DE RESPUESTA:
-- Un solo párrafo.
-- En español.
-- Sin listas.
-- Sin explicaciones técnicas.
+PDF:
+{texto_pdf}
 
-EJEMPLOS:
-
-Ejemplo 1:
-PDF: TENA Toallas $7.149,50
-Excel: TENA Toallas 7148.40
-Respuesta correcta:
-"Hay un error de precio en el producto TENA Toallas, donde el valor del PDF no coincide con el del Excel.(codigo de producto)"
-
-Ejemplo 2:
-PDF: ARROZ $1.299
-Excel: ARROZ 1299
-Respuesta correcta:
-"No se detectan errores de precio."
-
-Ejemplo 3:
-PDF: EXTREME Lápiz labial chubby balm hmectante Tonos seleccionadoss 
-Excel: EXTREME Lápiz labial chubby balm humectante  Tonos seleccionados  
-Respuesta correcta:
-"Hay un error en la planra humectante y palabra seleccionadoss."
-
-REGLAS ADICIONALES SOBRE DESCRIPCIONES:
-- Compará las descripciones del producto del PDF contra el Excel.
-- Considerá ERROR si la descripción NO es exactamente igual al Excel.
-- No corrijas, no interpretes, no normalices.
-- Las descripciones deben coincidir carácter por carácter.
-- Diferencias de mayúsculas, espacios, símbolos o abreviaturas
-  cuentan como ERROR.
-
-DATOS REALES A ANALIZAR:
-
-PDF (ofertas):
-{pdf_text}
-
-Excel (datos correctos):
-{excel_text}
-
-Tarea:
-Compará precios y descpicpiones entre el PDF y el Excel.
-Respondé SOLO si hay errores de precio y descripciones de producto
-Si hay errores, describilos.
-Decí la fila del excel del prodcuto con error 
-Si no hay errores, decilo explícitamente.
-Respondé en UN SOLO PÁRRAFO, en español.
-No hagas listas.
-Reportá errores SOLO si:
-- hay diferencia de precio, y/o
-- la descripción del producto NO coincide exactamente con el Excel.
+EXCEL:
+{texto_excel}
 """
 
         # ---------- Llamada a la IA ----------
@@ -133,6 +81,7 @@ Reportá errores SOLO si:
             os.remove(excel_path)
         except:
             pass
+
 
 
 
